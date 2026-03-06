@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Checking replication status on primary..."
-docker exec -i "$(docker compose ps -q postgres-primary)" psql -U app -d appdb -c "select application_name, state, sync_state, write_lag, flush_lag, replay_lag from pg_stat_replication;"
+primary_id="$(docker compose ps -q redis-primary)"
+replica_id="$(docker compose ps -q redis-replica)"
+if [[ -z "${primary_id}" || -z "${replica_id}" ]]; then
+  echo "Redis lab is not running. Run: make up"
+  exit 1
+fi
+
+echo "Primary replication info:"
+docker exec -i "${primary_id}" bash -lc 'set -euo pipefail; export REDISCLI_AUTH="${REDIS_PASSWORD}"; redis-cli INFO replication | egrep "^(role|connected_slaves|master_replid|master_repl_offset):"'
 
 echo
-echo "Checking replica is in recovery mode..."
-docker exec -i "$(docker compose ps -q postgres-replica)" psql -U app -d appdb -c "select pg_is_in_recovery();"
+echo "Replica replication info:"
+docker exec -i "${replica_id}" bash -lc 'set -euo pipefail; export REDISCLI_AUTH="${REDIS_PASSWORD}"; redis-cli INFO replication | egrep "^(role|master_host|master_link_status|master_last_io_seconds_ago|slave_repl_offset):"'

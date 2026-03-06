@@ -1,37 +1,65 @@
 # 37-aws-reliability-security-redis
 
-A production-minded Database Reliability Engineering toolkit: HA lab, backup/PITR drills, and zero-downtime migration playbooks.
-
-Focus: redis
-
-
-## Why this repo exists
-This is a portfolio-grade, runnable toolkit that demonstrates how I approach database reliability work:
-safe changes, predictable operations, and recovery you can actually trust.
+A portfolio-grade **Redis reliability and security** toolkit:
+offline demos, deterministic guardrails, and explicit validation modes.
 
 ## The top pains this repo addresses
-1) Replacing manual, risky changes with automated delivery—repeatable infrastructure, safe deployments, and drift-free environments (IaC + CI/CD + GitOps).
-2) Building a data platform people trust—reliable pipelines, clear ownership, data quality checks, and governance that scales without slowing delivery.
-3) Making databases boring again—high availability, predictable performance, safe backups, and zero/low-downtime migrations with solid tooling and runbooks.
+1) Making stateful services boring again—predictable performance, safe backups, and repeatable recovery drills.
+2) Replacing manual, risky changes with automation—repeatable infrastructure and safer operational workflows.
+3) Enforcing security and governance without slowing delivery—explicit guardrails and production-safe validation paths.
 
 ## Quick demo (local)
-Prereqs: Docker + Docker Compose.
+Prereqs: Docker + Docker Compose (for the container lab).
 
 ```bash
-make demo
+make up
+make seed
+make check
+make backup
+make restore
 ```
 
 What you get:
-- a Postgres primary + replica setup
-- PgBouncer for connection pooling
-- scripts to verify replication and run backup/restore drills
+- a Redis primary + replica lab (password-protected)
+- a safe replication check drill
+- a deterministic backup/restore drill for demo keys (`demo:*`)
 
-## Design decisions (high level)
-- Prefer drills and runbooks over “tribal knowledge”.
-- Keep the lab small but realistic (replication + pooling + backup).
-- Make failure modes explicit and testable.
+## Tests (two explicit modes)
 
-## What I would do next in production
-- Add PITR with WAL archiving + periodic restore tests.
-- Add SLOs (p95 query latency, replication lag) and alert thresholds.
-- Add automated migration checks (preflight, locks, backout plan).
+- `TEST_MODE=demo` (default): offline-only checks, deterministic artifacts
+- `TEST_MODE=production`: real integrations (requires explicit opt-in + configuration)
+
+Run demo mode:
+
+```bash
+make test-demo
+```
+
+Run production mode:
+
+```bash
+make test-production
+```
+
+Production integration options:
+- Set `REDIS_TEST_URL` (or `REDIS_TEST_HOST`/`REDIS_TEST_PORT`) to run a real Redis `PING` check
+- Optionally set `TERRAFORM_VALIDATE=1` to validate the included Terraform example (requires `terraform`)
+
+## Sponsorship and contact
+
+Sponsored by:
+CloudForgeLabs  
+https://cloudforgelabs.ainextstudios.com/  
+support@ainextstudios.com
+
+Built by:
+Freddy D. Alvarez  
+https://www.linkedin.com/in/freddy-daniel-alvarez/
+
+For job opportunities, contact:
+it.freddy.alvarez@gmail.com
+
+## License
+
+Personal, educational, and non-commercial use is free. Commercial use requires paid permission.
+See `LICENSE` and `COMMERCIAL_LICENSE.md`.
